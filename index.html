@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Seat Booking</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+        }
+        .navbar a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+        .container {
+            padding: 2rem;
+        }
+        .row {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+        .col {
+            flex: 1;
+            padding: 1rem;
+        }
+        .seat-map {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            background-color: #5cb85c;
+            cursor: pointer;
+            text-align: center;
+            line-height: 50px;
+            color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .seat.booked {
+            background-color: #d9534f;
+            cursor: not-allowed;
+        }
+        .seat.selected {
+            background-color: #f0ad4e;
+        }
+        #seat-map-ac {
+            background: url('ac-room-bg.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        #seat-map-non-ac {
+            background: url('non-ac-room-bg.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        #seat-map-reading {
+            background: url('reading-room-bg.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        .footer {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#">Library Seat Booking</a>
+        <a href="#">Home</a>
+        <a href="bookings.html">Bookings</a> <!-- Link to bookings.html -->
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h2>AC Room</h2>
+                <img src="AC.jpg" alt="AC Room" style="width:100%;">
+                <div id="seat-map-ac" class="seat-map">
+                    <!-- Seats will be rendered here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="col">
+                <h2>Non-AC Room</h2>
+                <img src="NonAC.jpeg" alt="Non-AC Room" style="width:100%;">
+                <div id="seat-map-non-ac" class="seat-map">
+                    <!-- Seats will be rendered here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="col">
+                <h2>Reading Room</h2>
+                <img src="Reading.jpeg" alt="Reading Room" style="width:100%;">
+                <div id="seat-map-reading" class="seat-map">
+                    <!-- Seats will be rendered here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div id="booking-details">
+            <h3>No seats selected</h3>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const seatMaps = {
+                ac: document.getElementById('seat-map-ac'),
+                nonAc: document.getElementById('seat-map-non-ac'),
+                reading: document.getElementById('seat-map-reading')
+            };
+    
+            const seats = {
+                ac: [],
+                nonAc: [],
+                reading: []
+            };
+    
+            function initializeSeats(seatMap, seatArray, count) {
+                for (let i = 0; i < count; i++) {
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.textContent = i + 1;
+                    seat.addEventListener('click', () => selectSeat(seat, seatArray, i));
+                    seatMap.appendChild(seat);
+                    seatArray.push({ id: i, booked: false, element: seat });
+                }
+            }
+    
+            function selectSeat(seat, seatArray, index) {
+                if (seatArray[index].booked) return;
+                seat.classList.toggle('selected');
+                updateBookingDetails();
+            }
+    
+            function updateBookingDetails() {
+                const selectedSeats = [...seats.ac, ...seats.nonAc, ...seats.reading].filter(seat => seat.element.classList.contains('selected'));
+                const bookingDetails = document.getElementById('booking-details');
+                
+                if (selectedSeats.length > 0) {
+                    bookingDetails.innerHTML = `
+                        <h3>Selected Seats</h3>
+                        <ul class="list-group mb-3">
+                            ${selectedSeats.map(seat => `<li class="list-group-item">Seat ${seat.id + 1} in ${seat.element.parentElement.id.replace('seat-map-', '').toUpperCase()} Room</li>`).join('')}
+                        </ul>
+                        <button class="btn btn-primary btn-block" onclick="bookSeats()">Book Now</button>
+                    `;
+                } else {
+                    bookingDetails.innerHTML = `<h3>No seats selected</h3>`;
+                }
+            }
+    
+            window.bookSeats = function() {
+                const name = prompt("Please enter your name:");
+                if (!name) {
+                    alert("Name is required to book a seat.");
+                    return;
+                }
+    
+                const time = prompt("Please enter the time duration (in hours) you want to book the seat for:");
+                if (!time) {
+                    alert("Time duration is required to book a seat.");
+                    return;
+                }
+    
+                const selectedSeats = [...seats.ac, ...seats.nonAc, ...seats.reading].filter(seat => seat.element.classList.contains('selected'));
+                const bookingDetails = [];
+    
+                selectedSeats.forEach(seat => {
+                    seat.booked = true;
+                    seat.element.classList.remove('selected');
+                    seat.element.classList.add('booked');
+                    seat.element.dataset.bookedBy = name; // Store the name in a data attribute
+                    
+                    bookingDetails.push({
+                        seatId: seat.id + 1,
+                        room: seat.element.parentElement.id.replace('seat-map-', '').toUpperCase(),
+                        bookedBy: name,
+                        time: time
+                    });
+                });
+    
+                // Save booking details to localStorage
+                localStorage.setItem('bookingDetails', JSON.stringify(bookingDetails));
+    
+                // Redirect to bookings.html
+                window.location.href = 'bookings.html';
+            }
+    
+            initializeSeats(seatMaps.ac, seats.ac, 20);
+            initializeSeats(seatMaps.nonAc, seats.nonAc, 20);
+            initializeSeats(seatMaps.reading, seats.reading, 20);
+        });
+    </script>
+    
+    
+</body>
+</html>

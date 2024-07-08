@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+        }
+        .navbar a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+        .container {
+            padding: 2rem;
+        }
+        .footer {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#">Library Seat Booking</a>
+        <a href="index.html">Home</a>
+        <a href="#">Bookings</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="container">
+        <h2>Booking Details</h2>
+        <div id="booking-list">
+            <!-- Booking details will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookingDetails = JSON.parse(localStorage.getItem('bookingDetails')) || [];
+            const bookingList = document.getElementById('booking-list');
+
+            if (bookingDetails.length > 0) {
+                bookingList.innerHTML = `
+                    <ul class="list-group mb-3">
+                        ${bookingDetails.map(detail => `<li class="list-group-item">Seat ${detail.seatId} in ${detail.room} Room - Booked by ${detail.bookedBy} for ${detail.time} hours</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                bookingList.innerHTML = `<p>No bookings found.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
